@@ -19,10 +19,10 @@ export const Login: React.FC = () => {
     try {
       const success = await login(email, password);
       if (!success) {
-        setError('Credenciais inválidas. Tente admin@chabra.com.br');
+        setError('E-mail ou senha incorretos. Verifique suas credenciais.');
       }
     } catch (err) {
-      setError('Ocorreu um erro ao tentar entrar.');
+      setError('Ocorreu um erro técnico ao tentar entrar.');
     } finally {
       setIsLoading(false);
     }
@@ -38,10 +38,10 @@ export const Login: React.FC = () => {
         <div className="flex flex-col items-center text-center">
           <Logo size="lg" />
           <h2 className="mt-8 text-3xl font-black text-gray-900 tracking-tight">
-            Bem-vindo de volta
+            Acesso Restrito
           </h2>
           <p className="mt-2 text-sm text-gray-500 font-medium">
-            Acesse sua plataforma de gestão interna
+            Entre com suas credenciais de administrador CHABRA
           </p>
         </div>
 
@@ -67,7 +67,7 @@ export const Login: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="exemplo@chabra.com.br"
+                  placeholder="admin@chabra.com.br"
                   className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-500/50 focus:bg-white transition-all font-medium"
                 />
               </div>
@@ -76,11 +76,8 @@ export const Login: React.FC = () => {
             <div className="space-y-2">
               <div className="flex justify-between items-center px-1">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                  Senha de Acesso
+                  Senha
                 </label>
-                <a href="#" className="text-[10px] font-black text-green-600 hover:text-green-700 uppercase tracking-widest">
-                  Esqueceu?
-                </a>
               </div>
               <div className="relative group">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-green-600 transition-colors">
@@ -91,7 +88,7 @@ export const Login: React.FC = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder="Sua senha"
                   className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-500/50 focus:bg-white transition-all font-medium"
                 />
               </div>
@@ -112,12 +109,17 @@ export const Login: React.FC = () => {
               )}
             </button>
           </form>
+          
+          <div className="mt-6 pt-6 border-t border-gray-50 text-center">
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+              Dica: Use a senha padrão do ambiente de testes
+            </p>
+          </div>
         </div>
 
-        <div className="text-center space-y-4">
+        <div className="text-center">
           <p className="text-xs text-gray-400 font-medium">
-            Ao entrar, você concorda com nossos <br />
-            <span className="text-gray-900 font-bold cursor-pointer hover:underline">Termos de Uso</span> e <span className="text-gray-900 font-bold cursor-pointer hover:underline">Privacidade</span>.
+            Chabra Gestão Interna &copy; {new Date().getFullYear()}
           </p>
         </div>
       </div>

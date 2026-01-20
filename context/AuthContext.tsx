@@ -19,15 +19,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   });
 
   const login = async (email: string, pass: string): Promise<boolean> => {
-    // Simulação de delay de rede
-    await new Promise(resolve => setTimeout(resolve, 800));
+    // Simulação de delay de rede para experiência de UI
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
-    const foundUser = mockUsers.find(u => u.email === email);
+    // Verificação simplificada: Admin com senha específica, outros com qualquer senha
+    const foundUser = mockUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+    
+    // CONDIÇÃO DE ACESSO:
+    // Se for o admin, a senha deve ser 'chabra2024'
+    // Se for outro usuário do mock, aceitamos qualquer senha por enquanto (ambiente interno)
     if (foundUser) {
+      if (foundUser.role === 'ADMIN' && pass !== 'chabra2024') {
+        return false;
+      }
+      
       setUser(foundUser);
       localStorage.setItem('chabra_user', JSON.stringify(foundUser));
       return true;
     }
+    
     return false;
   };
 
