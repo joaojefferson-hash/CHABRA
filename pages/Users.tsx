@@ -7,12 +7,9 @@ import {
   Shield, 
   MoreHorizontal, 
   UserPlus, 
-  Mail, 
   X, 
   Check, 
-  AlertCircle,
   ChevronDown,
-  // Added Clock and fixed Users import
   Users as LucideUsers,
   Clock
 } from 'lucide-react';
@@ -111,7 +108,7 @@ export const Users: React.FC = () => {
       status: 'PENDING',
       permissions: []
     };
-    setUsers(prev => [...prev, newUser]);
+    setUsers(prev => [newUser, ...prev]);
     setIsModalOpen(false);
   };
 
