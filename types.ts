@@ -10,6 +10,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  password?: string;
   avatar: string;
   role: UserRole;
   status: 'ACTIVE' | 'PENDING' | 'DISABLED';
@@ -84,7 +85,6 @@ export interface TaskTemplate {
   defaultSubtasks: string[];
 }
 
-// Helper para hierarquia (quanto menor o número, maior o poder)
 export const RoleHierarchy: Record<UserRole, number> = {
   'ADMINISTRADOR': 0,
   'GERENTE': 1,

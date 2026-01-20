@@ -5,7 +5,7 @@ import { User, UserRole } from '../types.ts';
 import { useAuth } from '../context/AuthContext.tsx';
 import { 
   Shield, UserPlus, X, Users as LucideUsers, Edit2, UserX, UserCheck, Trash2, 
-  AlertCircle, Mail, MoreVertical, Search, Filter, Check, UserCircle, Lock
+  AlertCircle, Mail, MoreVertical, Search, Filter, Check, UserCircle, Lock, Eye, EyeOff
 } from 'lucide-react';
 
 const UserModal: React.FC<{ 
@@ -14,18 +14,37 @@ const UserModal: React.FC<{
   onSave: (userData: Omit<User, 'id' | 'status' | 'permissions'>) => void 
 }> = ({ user, onClose, onSave }) => {
   const { can } = useAuth();
+  
+  // Recuperar a senha do localStorage se estiver editando, pois ela não fica no estado global por segurança
+  const getStoredPassword = () => {
+    if (!user) return '';
+    const localUsersStr = localStorage.getItem('chabra_users_list');
+    if (localUsersStr) {
+      const allUsers = JSON.parse(localUsersStr);
+      const found = allUsers.find((u: any) => u.id === user.id);
+      return found?.password || '';
+    }
+    return '';
+  };
+
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
+  const [password, setPassword] = useState(getStoredPassword());
   const [role, setRole] = useState<UserRole>(user?.role || 'ANALISTA');
+  const [showPassword, setShowPassword] = useState(false);
 
   const isAdmin = can('MANAGE_USERS');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email) return;
+    if (!name || !email || !password) {
+      alert("Por favor, preencha todos os campos, incluindo a senha.");
+      return;
+    }
     onSave({ 
       name, 
-      email, 
+      email,
+      password,
       role, 
       avatar: user?.avatar || `https://picsum.photos/seed/${email}/100` 
     });
@@ -77,6 +96,27 @@ const UserModal: React.FC<{
               value={email} 
               onChange={e => setEmail(e.target.value)} 
             />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Senha de Acesso</label>
+            <div className="relative">
+              <input 
+                required 
+                type={showPassword ? "text" : "password"} 
+                className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-500/50 transition-all pr-12" 
+                placeholder="Defina a senha do usuário"
+                value={password} 
+                onChange={e => setPassword(e.target.value)} 
+              />
+              <button 
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
           <div className="space-y-2">

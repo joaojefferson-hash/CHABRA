@@ -21,8 +21,8 @@ export const Login: React.FC = () => {
       if (!success) {
         setError('E-mail ou senha incorretos. Verifique suas credenciais.');
       }
-    } catch (err) {
-      setError('Ocorreu um erro técnico ao tentar entrar.');
+    } catch (err: any) {
+      setError(err.message || 'Ocorreu um erro técnico ao tentar entrar.');
     } finally {
       setIsLoading(false);
     }
@@ -55,7 +55,7 @@ export const Login: React.FC = () => {
 
             <div className="space-y-2">
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                E-mail Corporativo
+                E-MAIL CORPORATIVO
               </label>
               <div className="relative group">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-green-600 transition-colors">
@@ -66,7 +66,7 @@ export const Login: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Seu e-mail corporativo"
+                  placeholder="ex: nome.sobrenome@chabra.com.br"
                   className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-500/50 focus:bg-white transition-all font-medium"
                 />
               </div>
@@ -74,7 +74,7 @@ export const Login: React.FC = () => {
 
             <div className="space-y-2">
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                Senha
+                SENHA
               </label>
               <div className="relative group">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-green-600 transition-colors">
@@ -85,7 +85,7 @@ export const Login: React.FC = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Sua senha de acesso"
+                  placeholder="Digite sua senha"
                   className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-500/50 focus:bg-white transition-all font-medium"
                 />
               </div>
@@ -105,12 +105,18 @@ export const Login: React.FC = () => {
                 </>
               )}
             </button>
+            
+            <div className="text-center pt-2">
+              <p className="text-[9px] text-gray-400 font-black uppercase tracking-widest leading-relaxed">
+                SENHA PADRÃO: <span className="text-green-600">chabra2024</span> OU <span className="text-green-600">123456</span>
+              </p>
+            </div>
           </form>
         </div>
 
         <div className="text-center">
           <p className="text-xs text-gray-400 font-medium">
-            Chabra Gestão Interna &copy; {new Date().getFullYear()}
+            Chabra Gestão Interna &copy; 2026
           </p>
         </div>
       </div>

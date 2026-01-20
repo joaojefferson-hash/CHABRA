@@ -19,7 +19,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulando verificação de sessão inicial (reidratação)
     const initAuth = () => {
       try {
         const saved = localStorage.getItem('chabra_user');
@@ -37,14 +36,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const login = async (email: string, pass: string): Promise<boolean> => {
     setIsLoading(true);
-    // Simulação de delay de rede para backend
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 800));
     
-    // Aqui no futuro trocaremos pelo supabase.auth.signInWithPassword
+    const normalizedEmail = email.trim().toLowerCase();
+    
+    // Busca na lista de usuários (Prioriza localStorage onde estão os novos)
     const localUsersStr = localStorage.getItem('chabra_users_list');
     const allAvailableUsers = localUsersStr ? JSON.parse(localUsersStr) : mockUsers;
     
-    const foundUser = allAvailableUsers.find((u: any) => u.email.toLowerCase() === email.toLowerCase());
+    const foundUser = allAvailableUsers.find((u: any) => u.email.trim().toLowerCase() === normalizedEmail);
     
     if (foundUser) {
       if (foundUser.status === 'DISABLED') {
@@ -52,14 +52,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         throw new Error('Conta suspensa. Entre em contato com o administrador.');
       }
 
-      // Validação de senha master para o admin mockado
-      if (foundUser.role === 'ADMINISTRADOR' && email === 'admin@chabra.com.br' && pass !== 'chabra2024') {
+      // Lógica de Senha:
+      // 1. Verifica se a senha digitada coincide com a cadastrada no usuário
+      // 2. Mantém master passwords apenas para o admin@chabra.com.br original
+      const userStoredPassword = foundUser.password;
+      const isMasterAdmin = normalizedEmail === 'admin@chabra.com.br';
+      const masterPasswords = ['chabra2024', '123456'];
+
+      const isValidPassword = 
+        (userStoredPassword && pass === userStoredPassword) || 
+        (isMasterAdmin && masterPasswords.includes(pass));
+
+      if (!isValidPassword) {
         setIsLoading(false);
         return false;
       }
       
-      setUser(foundUser);
-      localStorage.setItem('chabra_user', JSON.stringify(foundUser));
+      // Remove a senha do objeto de usuário da sessão por segurança
+      const { password, ...userWithoutPassword } = foundUser;
+      
+      setUser(userWithoutPassword as User);
+      localStorage.setItem('chabra_user', JSON.stringify(userWithoutPassword));
       setIsLoading(false);
       return true;
     }
@@ -69,11 +82,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = () => {
-    // Limpeza atômica de todos os estados de sessão
     localStorage.removeItem('chabra_user');
-    sessionStorage.clear(); // Limpa caches temporários
+    sessionStorage.clear();
     setUser(null);
-    // O redirecionamento ocorre automaticamente via PrivateRoute
   };
 
   const can = (action: string): boolean => {
