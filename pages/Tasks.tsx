@@ -284,7 +284,12 @@ export const Tasks: React.FC<TasksProps> = ({
       </div>
 
       {selectedTask && (
-        <TaskDetailsModal task={selectedTask} onClose={() => setSelectedTask(null)} onUpdate={handleUpdateSingleTask} />
+        <TaskDetailsModal 
+          task={selectedTask} 
+          onClose={() => setSelectedTask(null)} 
+          onUpdate={handleUpdateSingleTask} 
+          statusConfigs={statusConfig}
+        />
       )}
     </div>
   );

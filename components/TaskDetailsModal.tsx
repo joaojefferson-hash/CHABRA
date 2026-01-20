@@ -2,7 +2,7 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { X, CheckCircle2, Circle, Plus, Trash2, Calendar, User, Tag, Flag, MessageSquare, Clock, Paperclip, Upload, FileText, ExternalLink, Check, Lock } from 'lucide-react';
 import { Task, Subtask, Priority, Attachment } from '../types.ts';
-import { STATUS_CONFIG, PRIORITY_CONFIG } from '../constants.tsx';
+import { PRIORITY_CONFIG, STATUS_CONFIG as DEFAULT_STATUS_CONFIG } from '../constants.tsx';
 import { mockUsers } from '../store.ts';
 import { useAuth } from '../context/AuthContext.tsx';
 
@@ -10,9 +10,16 @@ interface TaskDetailsModalProps {
   task: Task;
   onClose: () => void;
   onUpdate: (updatedTask: Task) => void;
+  // Adicionado suporte a status configs externos para suportar customizados
+  statusConfigs?: Record<string, { label: string, color: string, textColor: string }>;
 }
 
-export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ task, onClose, onUpdate }) => {
+export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ 
+  task, 
+  onClose, 
+  onUpdate,
+  statusConfigs = DEFAULT_STATUS_CONFIG
+}) => {
   const { user, can } = useAuth();
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
   const [isAddingTag, setIsAddingTag] = useState(false);
@@ -23,9 +30,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ task, onClos
   // Lógica de Permissão de Edição Consolidada
   const canEdit = useMemo(() => {
     if (!user) return false;
-    // Administradores, Gerentes e Supervisores podem editar tudo (via can EDIT_OTHERS_TASKS definido no AuthContext)
     if (can('EDIT_OTHERS_TASKS')) return true;
-    // Criador e Assignee podem sempre editar suas próprias tarefas
     return task.creatorId === user.id || task.assigneeId === user.id;
   }, [task, user, can]);
   
@@ -65,6 +70,11 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ task, onClos
   const handlePriorityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (!canEdit) return;
     onUpdate({ ...task, priority: e.target.value as Priority, updatedAt: new Date().toISOString() });
+  };
+
+  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (!canEdit) return;
+    onUpdate({ ...task, status: e.target.value, updatedAt: new Date().toISOString() });
   };
 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -112,6 +122,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ task, onClos
   const progress = task.subtasks.length > 0 ? (completedCount / task.subtasks.length) * 100 : 0;
   
   const displayTaskId = task.id.includes('-') ? task.id.split('-')[1] : task.id;
+  const currentStatus = statusConfigs[task.status] || { label: task.status, color: 'bg-gray-400', textColor: 'text-white' };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
@@ -126,9 +137,18 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ task, onClos
 
         <div className="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-white">
           <div className="flex items-center gap-4">
-            <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${STATUS_CONFIG[task.status]?.color || 'bg-gray-400'} text-white shadow-sm shadow-black/10`}>
-              {STATUS_CONFIG[task.status]?.label || task.status}
-            </span>
+            <div className="relative">
+              <select
+                disabled={!canEdit}
+                value={task.status}
+                onChange={handleStatusChange}
+                className={`appearance-none px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${currentStatus.color} ${currentStatus.textColor} shadow-sm shadow-black/10 cursor-pointer outline-none border-none`}
+              >
+                {Object.entries(statusConfigs).map(([id, config]) => (
+                  <option key={id} value={id} className="bg-white text-gray-900">{config.label}</option>
+                ))}
+              </select>
+            </div>
             <div className="flex items-center gap-2">
               <span className="text-gray-400 text-sm font-medium">#{displayTaskId}</span>
               <span className="text-gray-200">|</span>
