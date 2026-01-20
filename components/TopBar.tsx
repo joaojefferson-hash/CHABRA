@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Search, Bell, HelpCircle, Plus } from 'lucide-react';
 
-export const TopBar: React.FC<{ title: string }> = ({ title }) => {
+export const TopBar: React.FC<{ title: string, onNewTask: () => void }> = ({ title, onNewTask }) => {
   const [showNotifications, setShowNotifications] = useState(false);
 
   return (
@@ -20,7 +20,10 @@ export const TopBar: React.FC<{ title: string }> = ({ title }) => {
       </div>
 
       <div className="flex items-center gap-3">
-        <button className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm shadow-green-200">
+        <button 
+          onClick={onNewTask}
+          className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm shadow-green-200"
+        >
           <Plus size={18} />
           <span>Nova Tarefa</span>
         </button>

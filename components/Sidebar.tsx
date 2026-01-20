@@ -1,12 +1,35 @@
 
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { Logo } from './Logo';
-import { NAVIGATION_ITEMS, CHABRA_COLORS } from '../constants';
-import { mockProjects } from '../store';
-import { Plus, ChevronDown, Hash, Star } from 'lucide-react';
+import { NAVIGATION_ITEMS } from '../constants';
+import { Project } from '../types';
+import { Plus, ChevronDown, Star, Settings, Trash2, Edit2 } from 'lucide-react';
 
-export const Sidebar: React.FC = () => {
+interface SidebarProps {
+  projects: Project[];
+  activeProjectId: string | null;
+  onSelectProject: (id: string | null) => void;
+  onAddProject: () => void;
+  onDeleteProject: (id: string) => void;
+  onEditProject: (id: string) => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ 
+  projects, 
+  activeProjectId, 
+  onSelectProject, 
+  onAddProject,
+  onDeleteProject,
+  onEditProject 
+}) => {
+  const navigate = useNavigate();
+
+  const handleProjectClick = (id: string) => {
+    onSelectProject(id);
+    navigate('/tasks');
+  };
+
   return (
     <aside className="w-64 h-screen bg-white border-r border-gray-200 flex flex-col sticky top-0 z-20 shadow-sm">
       <div className="p-5 border-b border-gray-50">
@@ -26,14 +49,14 @@ export const Sidebar: React.FC = () => {
               <NavLink
                 key={item.id}
                 to={item.path}
+                onClick={() => item.id === 'tasks' ? onSelectProject(null) : null}
                 className={({ isActive }) => `
                   flex items-center gap-3 px-3 py-2 rounded-md text-xs font-bold transition-all
-                  ${isActive 
+                  ${isActive && (item.id !== 'tasks' || !activeProjectId)
                     ? 'bg-green-50 text-green-700 shadow-sm ring-1 ring-green-100' 
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}
                 `}
               >
-                {/* Fixed: Wrapped children in a function to access the isActive state correctly from NavLink */}
                 {({ isActive }) => (
                   <>
                     <span className={isActive ? 'text-green-600' : 'text-gray-400'}>{item.icon}</span>
@@ -48,25 +71,48 @@ export const Sidebar: React.FC = () => {
         <div>
           <div className="flex items-center justify-between px-3 mb-2">
             <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.15em]">
-              Espaços (Projetos)
+              Espaços
             </h3>
-            <button className="text-gray-400 hover:text-green-600 transition-colors">
+            <button 
+              onClick={onAddProject}
+              className="text-gray-400 hover:text-green-600 transition-colors"
+            >
               <Plus size={14} />
             </button>
           </div>
           <div className="space-y-0.5">
-            {mockProjects.map((project) => (
-              <button
-                key={project.id}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-xs font-bold text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all group"
-              >
-                <div 
-                  className="w-2 h-2 rounded-sm rotate-45" 
-                  style={{ backgroundColor: project.color }}
-                />
-                <span className="flex-1 text-left truncate">{project.name}</span>
-                <ChevronDown size={12} className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-300" />
-              </button>
+            {projects.map((project) => (
+              <div key={project.id} className="group relative">
+                <button
+                  onClick={() => handleProjectClick(project.id)}
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-xs font-bold transition-all
+                    ${activeProjectId === project.id 
+                      ? 'bg-gray-100 text-gray-900 shadow-inner' 
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}
+                  `}
+                >
+                  <div 
+                    className="w-2.5 h-2.5 rounded-sm" 
+                    style={{ backgroundColor: project.color }}
+                  />
+                  <span className="flex-1 text-left truncate">{project.name}</span>
+                </button>
+                
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 backdrop-blur-sm rounded px-1">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); onEditProject(project.id); }}
+                    className="p-1 text-gray-400 hover:text-blue-500"
+                  >
+                    <Edit2 size={12} />
+                  </button>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); onDeleteProject(project.id); }}
+                    className="p-1 text-gray-400 hover:text-red-500"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -80,12 +126,12 @@ export const Sidebar: React.FC = () => {
               alt="User" 
               className="w-8 h-8 rounded-full ring-2 ring-white"
             />
-            <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full" />
           </div>
           <div className="flex-1 overflow-hidden">
             <p className="text-xs font-extrabold text-gray-900 truncate">Admin Chabra</p>
             <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Workspace Owner</p>
           </div>
+          <Settings size={14} className="text-gray-300" />
         </div>
       </div>
     </aside>
