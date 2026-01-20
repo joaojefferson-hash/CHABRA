@@ -94,6 +94,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ task, onClos
   };
 
   const assignee = mockUsers.find(u => u.id === task.assigneeId);
+  const creator = mockUsers.find(u => u.id === task.creatorId);
   const completedCount = task.subtasks.filter(st => st.isCompleted).length;
   const progress = task.subtasks.length > 0 ? (completedCount / task.subtasks.length) * 100 : 0;
   
@@ -324,6 +325,36 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ task, onClos
                         </option>
                       ))}
                     </select>
+                  </div>
+                </div>
+
+                {/* Assignee Name */}
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center border border-gray-100 text-gray-400 shadow-sm overflow-hidden">
+                    {assignee?.avatar ? (
+                      <img src={assignee.avatar} alt={assignee.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <User size={20} />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Nome do Responsável</p>
+                    <p className="text-sm font-bold text-gray-900">{assignee?.name || 'Não atribuído'}</p>
+                  </div>
+                </div>
+
+                {/* Creator's Name */}
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center border border-gray-100 text-green-500 shadow-sm overflow-hidden">
+                    {creator?.avatar ? (
+                      <img src={creator.avatar} alt={creator.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <User size={20} />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Criado por</p>
+                    <p className="text-sm font-bold text-gray-900">{creator?.name || 'Sistema'}</p>
                   </div>
                 </div>
 
