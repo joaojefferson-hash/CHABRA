@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { User } from '../types.ts';
+import { User, UserRole, RoleHierarchy } from '../types.ts';
 import { mockUsers } from '../store.ts';
 
 interface AuthContextType {
@@ -8,6 +8,7 @@ interface AuthContextType {
   login: (email: string, pass: string) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
+  can: (action: 'MANAGE_USERS' | 'DELETE_PROJECT' | 'APPROVE_TASK' | 'EDIT_OTHERS_TASKS' | 'CREATE_TASK') => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,17 +20,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   });
 
   const login = async (email: string, pass: string): Promise<boolean> => {
-    // Simulação de delay de rede para experiência de UI
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Verificação simplificada: Admin com senha específica, outros com qualquer senha
     const foundUser = mockUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
     
-    // CONDIÇÃO DE ACESSO:
-    // Se for o admin, a senha deve ser 'chabra2024'
-    // Se for outro usuário do mock, aceitamos qualquer senha por enquanto (ambiente interno)
     if (foundUser) {
-      if (foundUser.role === 'ADMIN' && pass !== 'chabra2024') {
+      // Regra de senha: admin tem senha específica, outros livre para ambiente teste
+      if (foundUser.role === 'ADMINISTRADOR' && pass !== 'chabra2024') {
         return false;
       }
       
@@ -46,8 +43,29 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.removeItem('chabra_user');
   };
 
+  // Helper de permissões baseado na hierarquia automática
+  const can = (action: string): boolean => {
+    if (!user) return false;
+    const level = RoleHierarchy[user.role];
+
+    switch (action) {
+      case 'MANAGE_USERS':
+        return level === 0; // Apenas Administrador
+      case 'DELETE_PROJECT':
+        return level <= 1; // Administrador e Gerente
+      case 'APPROVE_TASK':
+        return level <= 1; // Administrador e Gerente
+      case 'EDIT_OTHERS_TASKS':
+        return level <= 2; // Até Supervisor
+      case 'CREATE_TASK':
+        return level <= 4; // Todos podem criar tarefas administrativas ou técnicas
+      default:
+        return false;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, can }}>
       {children}
     </AuthContext.Provider>
   );

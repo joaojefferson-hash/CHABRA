@@ -7,27 +7,45 @@ export const mockUsers: User[] = [
     name: 'Admin Chabra',
     email: 'admin@chabra.com.br',
     avatar: 'https://picsum.photos/seed/admin/100',
-    role: 'ADMIN',
+    role: 'ADMINISTRADOR',
     status: 'ACTIVE',
-    permissions: ['all']
+    permissions: []
   },
   {
     id: 'u2',
     name: 'João Silva',
     email: 'joao@chabra.com.br',
     avatar: 'https://picsum.photos/seed/joao/100',
-    role: 'MANAGER',
+    role: 'GERENTE',
     status: 'ACTIVE',
-    permissions: ['view_tasks', 'edit_tasks', 'view_metrics']
+    permissions: []
   },
   {
     id: 'u3',
     name: 'Maria Oliveira',
     email: 'maria@chabra.com.br',
     avatar: 'https://picsum.photos/seed/maria/100',
-    role: 'MEMBER',
+    role: 'SUPERVISOR',
     status: 'ACTIVE',
-    permissions: ['view_tasks', 'edit_own_tasks']
+    permissions: []
+  },
+  {
+    id: 'u4',
+    name: 'Carlos Santos',
+    email: 'carlos.tecnico@chabra.com.br',
+    avatar: 'https://picsum.photos/seed/carlos/100',
+    role: 'TECNICO',
+    status: 'ACTIVE',
+    permissions: []
+  },
+  {
+    id: 'u5',
+    name: 'Ana Costa',
+    email: 'ana.analista@chabra.com.br',
+    avatar: 'https://picsum.photos/seed/ana/100',
+    role: 'ANALISTA',
+    status: 'ACTIVE',
+    permissions: []
   }
 ];
 

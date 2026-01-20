@@ -1,5 +1,10 @@
 
-export type UserRole = 'ADMIN' | 'MANAGER' | 'MEMBER' | 'VIEWER';
+export type UserRole = 
+  | 'ADMINISTRADOR' 
+  | 'GERENTE' 
+  | 'SUPERVISOR' 
+  | 'TECNICO' 
+  | 'ANALISTA';
 
 export interface User {
   id: string;
@@ -11,7 +16,7 @@ export interface User {
   permissions: string[];
 }
 
-export type TaskStatus = string; // Mudado para string para permitir colunas dinâmicas
+export type TaskStatus = string;
 export type Priority = 'URGENT' | 'HIGH' | 'NORMAL' | 'LOW';
 
 export interface Subtask {
@@ -62,7 +67,6 @@ export interface Notification {
   timestamp: string;
 }
 
-// Fixed: Added TaskTemplate interface as it was missing and causing an import error in store.ts
 export interface TaskTemplate {
   id: string;
   name: string;
@@ -70,3 +74,12 @@ export interface TaskTemplate {
   defaultDescription: string;
   defaultSubtasks: string[];
 }
+
+// Helper para hierarquia (quanto menor o número, maior o poder)
+export const RoleHierarchy: Record<UserRole, number> = {
+  'ADMINISTRADOR': 0,
+  'GERENTE': 1,
+  'SUPERVISOR': 2,
+  'TECNICO': 3,
+  'ANALISTA': 4
+};

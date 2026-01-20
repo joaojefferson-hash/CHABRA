@@ -5,7 +5,7 @@ import { Logo } from './Logo';
 import { NAVIGATION_ITEMS } from '../constants';
 import { Project } from '../types';
 import { useAuth } from '../context/AuthContext.tsx';
-import { Plus, ChevronDown, Star, Settings, Trash2, Edit2, LogOut } from 'lucide-react';
+import { Plus, ChevronDown, Star, Settings, Trash2, Edit2, LogOut, Shield } from 'lucide-react';
 
 interface SidebarProps {
   projects: Project[];
@@ -25,7 +25,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onEditProject 
 }) => {
   const navigate = useNavigate();
-  const { logout, user } = useAuth();
+  const { logout, user, can } = useAuth();
 
   const handleProjectClick = (id: string) => {
     onSelectProject(id);
@@ -81,12 +81,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.15em]">
               Espaços
             </h3>
-            <button 
-              onClick={onAddProject}
-              className="text-gray-400 hover:text-green-600 transition-colors"
-            >
-              <Plus size={14} />
-            </button>
+            {can('DELETE_PROJECT') && (
+              <button 
+                onClick={onAddProject}
+                className="text-gray-400 hover:text-green-600 transition-colors"
+              >
+                <Plus size={14} />
+              </button>
+            )}
           </div>
           <div className="space-y-0.5">
             {projects.map((project) => (
@@ -106,20 +108,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <span className="flex-1 text-left truncate">{project.name}</span>
                 </button>
                 
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 backdrop-blur-sm rounded px-1">
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); onEditProject(project.id); }}
-                    className="p-1 text-gray-400 hover:text-blue-500"
-                  >
-                    <Edit2 size={12} />
-                  </button>
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); onDeleteProject(project.id); }}
-                    className="p-1 text-gray-400 hover:text-red-500"
-                  >
-                    <Trash2 size={12} />
-                  </button>
-                </div>
+                {can('DELETE_PROJECT') && (
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 backdrop-blur-sm rounded px-1">
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); onEditProject(project.id); }}
+                      className="p-1 text-gray-400 hover:text-blue-500"
+                    >
+                      <Edit2 size={12} />
+                    </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); onDeleteProject(project.id); }}
+                      className="p-1 text-gray-400 hover:text-red-500"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -127,19 +131,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </nav>
 
       <div className="p-4 border-t border-gray-100 bg-gray-50/50 space-y-2">
-        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-white transition-all cursor-pointer border border-transparent hover:border-gray-200">
+        <div className="flex items-center gap-3 p-2 rounded-lg bg-white border border-gray-100 shadow-sm">
           <div className="relative">
             <img 
               src={user?.avatar || "https://picsum.photos/seed/admin/100"} 
               alt="User" 
               className="w-8 h-8 rounded-full ring-2 ring-white"
             />
+            <div className="absolute -bottom-1 -right-1 bg-green-500 w-3 h-3 rounded-full border-2 border-white" />
           </div>
           <div className="flex-1 overflow-hidden">
             <p className="text-xs font-extrabold text-gray-900 truncate">{user?.name || "Usuário"}</p>
-            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">{user?.role === 'ADMIN' ? 'Administrador' : 'Colaborador'}</p>
+            <div className="flex items-center gap-1">
+              <Shield size={8} className="text-green-600" />
+              <p className="text-[8px] text-green-600 font-black uppercase tracking-widest truncate">
+                {user?.role}
+              </p>
+            </div>
           </div>
-          <Settings size={14} className="text-gray-300" />
         </div>
         
         <button 
