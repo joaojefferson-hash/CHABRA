@@ -8,7 +8,7 @@ import { Tasks } from './pages/Tasks';
 import { Users } from './pages/Users';
 import { Templates } from './pages/Templates';
 import { mockTasks as initialTasks, mockProjects as initialProjects } from './store';
-import { Task, TaskStatus, Project } from './types';
+import { Task, Project } from './types';
 import { STATUS_CONFIG as initialStatusConfig } from './constants';
 
 const App: React.FC = () => {
@@ -26,16 +26,16 @@ const App: React.FC = () => {
   const handleCreateTask = () => {
     const newTask: Task = {
       id: `task-${Date.now()}`,
-      title: 'Nova Tarefa Pendente',
+      title: 'Nova Tarefa',
       description: '',
-      status: 'TODO' as TaskStatus,
+      status: statusOrder[1] || 'TODO', // Padrão para a segunda coluna (geralmente TODO)
       priority: 'NORMAL',
       assigneeId: 'u1',
       creatorId: 'u1',
       dueDate: new Date().toISOString().split('T')[0],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      projectId: activeProjectId || projects[0].id,
+      projectId: activeProjectId || projects[0]?.id || 'default',
       tags: [],
       subtasks: [],
       attachments: []
@@ -44,13 +44,22 @@ const App: React.FC = () => {
   };
 
   const handleAddColumn = (name: string, color: string) => {
-    const id = name.toUpperCase().replace(/\s+/g, '_');
-    if (statusConfig[id]) return;
+    const id = name.toUpperCase().replace(/\s+/g, '_') + '_' + Date.now();
     setStatusConfig(prev => ({
       ...prev,
       [id]: { label: name, color: color, textColor: 'text-white' }
     }));
     setStatusOrder(prev => [...prev, id]);
+  };
+
+  const handleDeleteColumn = (id: string) => {
+    if (confirm("Deseja excluir esta coluna? As tarefas nela serão movidas para o Backlog.")) {
+      setTasks(prev => prev.map(t => t.status === id ? { ...t, status: 'BACKLOG' } : t));
+      setStatusOrder(prev => prev.filter(s => s !== id));
+      const newConfig = { ...statusConfig };
+      delete newConfig[id];
+      setStatusConfig(newConfig);
+    }
   };
 
   const handleAddProject = () => {
@@ -104,11 +113,12 @@ const App: React.FC = () => {
               <Route path="/tasks" element={
                 <Tasks 
                   tasks={activeProjectId ? tasks.filter(t => t.projectId === activeProjectId) : tasks} 
+                  allTasks={tasks}
                   onUpdateTasks={setTasks} 
                   statusConfig={statusConfig} 
                   statusOrder={statusOrder}
                   onAddColumn={handleAddColumn}
-                  allTasks={tasks}
+                  onDeleteColumn={handleDeleteColumn}
                 />
               } />
               <Route path="/users" element={<Users />} />

@@ -11,7 +11,7 @@ export interface User {
   permissions: string[];
 }
 
-export type TaskStatus = 'BACKLOG' | 'TODO' | 'IN_PROGRESS' | 'REVIEW' | 'DONE' | 'BLOCKED';
+export type TaskStatus = string; // Mudado para string para permitir colunas dinâmicas
 export type Priority = 'URGENT' | 'HIGH' | 'NORMAL' | 'LOW';
 
 export interface Subtask {
@@ -46,14 +46,6 @@ export interface Task {
   attachments?: Attachment[];
 }
 
-export interface TaskTemplate {
-  id: string;
-  name: string;
-  defaultTitle: string;
-  defaultDescription: string;
-  defaultSubtasks: string[];
-}
-
 export interface Project {
   id: string;
   name: string;
@@ -68,4 +60,13 @@ export interface Notification {
   type: 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR';
   read: boolean;
   timestamp: string;
+}
+
+// Fixed: Added TaskTemplate interface as it was missing and causing an import error in store.ts
+export interface TaskTemplate {
+  id: string;
+  name: string;
+  defaultTitle: string;
+  defaultDescription: string;
+  defaultSubtasks: string[];
 }
