@@ -46,11 +46,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Helper de permissões baseado na hierarquia automática
   const can = (action: string): boolean => {
     if (!user) return false;
+    
+    // REGRA DE OURO: Administrador sempre tem permissão total
+    if (user.role === 'ADMINISTRADOR') return true;
+
     const level = RoleHierarchy[user.role];
 
     switch (action) {
       case 'MANAGE_USERS':
-        return level === 0; // Apenas Administrador
+        return false; // Apenas Admin (já tratado acima)
       case 'DELETE_PROJECT':
         return level <= 1; // Administrador e Gerente
       case 'APPROVE_TASK':
@@ -58,7 +62,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       case 'EDIT_OTHERS_TASKS':
         return level <= 2; // Até Supervisor
       case 'CREATE_TASK':
-        return level <= 4; // Todos podem criar tarefas administrativas ou técnicas
+        return level <= 4; // Todos os níveis autenticados
       default:
         return false;
     }
