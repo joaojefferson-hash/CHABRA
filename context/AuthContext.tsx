@@ -15,17 +15,21 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('chabra_user');
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem('chabra_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
   });
 
   const login = async (email: string, pass: string): Promise<boolean> => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 800));
     
+    // Busca na lista de usuários (incluindo os que possam ter sido criados na sessão)
     const foundUser = mockUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
     
     if (foundUser) {
-      // Regra de senha: admin tem senha específica, outros livre para ambiente teste
       if (foundUser.role === 'ADMINISTRADOR' && pass !== 'chabra2024') {
         return false;
       }
@@ -39,30 +43,35 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = () => {
+    // 1. Limpa o estado local do React
     setUser(null);
+    
+    // 2. Limpa persistência física
     localStorage.removeItem('chabra_user');
+    localStorage.removeItem('chabra_users_list'); // Opcional: limpa lista de usuários se quiser reset total
+    sessionStorage.clear();
+    
+    // 3. Força o redirecionamento bruto para garantir que o Router resete
+    window.location.href = '/';
   };
 
-  // Helper de permissões baseado na hierarquia automática
   const can = (action: string): boolean => {
     if (!user) return false;
-    
-    // REGRA DE OURO: Administrador sempre tem permissão total
     if (user.role === 'ADMINISTRADOR') return true;
 
     const level = RoleHierarchy[user.role];
 
     switch (action) {
       case 'MANAGE_USERS':
-        return false; // Apenas Admin (já tratado acima)
+        return user.role === 'ADMINISTRADOR';
       case 'DELETE_PROJECT':
-        return level <= 1; // Administrador e Gerente
+        return level <= 1;
       case 'APPROVE_TASK':
-        return level <= 1; // Administrador e Gerente
+        return level <= 1;
       case 'EDIT_OTHERS_TASKS':
-        return level <= 2; // Até Supervisor
+        return level <= 2;
       case 'CREATE_TASK':
-        return level <= 4; // Todos os níveis autenticados
+        return level <= 4;
       default:
         return false;
     }

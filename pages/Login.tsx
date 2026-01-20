@@ -30,7 +30,6 @@ export const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F9F9F9] flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      {/* Elementos decorativos de fundo */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-green-500/5 rounded-full blur-3xl" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-red-500/5 rounded-full blur-3xl" />
 
@@ -41,7 +40,7 @@ export const Login: React.FC = () => {
             Acesso Restrito
           </h2>
           <p className="mt-2 text-sm text-gray-500 font-medium">
-            Entre com suas credenciais de administrador CHABRA
+            Entre com suas credenciais corporativas CHABRA
           </p>
         </div>
 
@@ -67,18 +66,16 @@ export const Login: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@chabra.com.br"
+                  placeholder="Seu e-mail corporativo"
                   className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-500/50 focus:bg-white transition-all font-medium"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <div className="flex justify-between items-center px-1">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                  Senha
-                </label>
-              </div>
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
+                Senha
+              </label>
               <div className="relative group">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-green-600 transition-colors">
                   <Lock size={18} />
@@ -88,7 +85,7 @@ export const Login: React.FC = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Sua senha"
+                  placeholder="Sua senha de acesso"
                   className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-500/50 focus:bg-white transition-all font-medium"
                 />
               </div>
@@ -109,12 +106,6 @@ export const Login: React.FC = () => {
               )}
             </button>
           </form>
-          
-          <div className="mt-6 pt-6 border-t border-gray-50 text-center">
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-              Dica: Use a senha padrão do ambiente de testes
-            </p>
-          </div>
         </div>
 
         <div className="text-center">

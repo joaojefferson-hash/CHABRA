@@ -5,7 +5,7 @@ import { Logo } from './Logo';
 import { NAVIGATION_ITEMS } from '../constants';
 import { Project } from '../types';
 import { useAuth } from '../context/AuthContext.tsx';
-import { Plus, ChevronDown, Star, Settings, Trash2, Edit2, LogOut, Shield } from 'lucide-react';
+import { Plus, Star, Trash2, Edit2, LogOut, Shield } from 'lucide-react';
 
 interface SidebarProps {
   projects: Project[];
@@ -32,8 +32,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     navigate('/tasks');
   };
 
-  const handleLogout = () => {
-    if (confirm("Deseja realmente sair do sistema?")) {
+  const handleLogoutClick = () => {
+    if (window.confirm("Deseja realmente sair do sistema?")) {
       logout();
     }
   };
@@ -53,26 +53,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <Star size={12} className="text-gray-300" />
           </div>
           <div className="space-y-0.5">
-            {NAVIGATION_ITEMS.map((item) => (
-              <NavLink
-                key={item.id}
-                to={item.path}
-                onClick={() => item.id === 'tasks' ? onSelectProject(null) : null}
-                className={({ isActive }) => `
-                  flex items-center gap-3 px-3 py-2 rounded-md text-xs font-bold transition-all
-                  ${isActive && (item.id !== 'tasks' || !activeProjectId)
-                    ? 'bg-green-50 text-green-700 shadow-sm ring-1 ring-green-100' 
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}
-                `}
-              >
-                {({ isActive }) => (
-                  <>
-                    <span className={isActive ? 'text-green-600' : 'text-gray-400'}>{item.icon}</span>
-                    {item.label}
-                  </>
-                )}
-              </NavLink>
-            ))}
+            {NAVIGATION_ITEMS.map((item) => {
+              if (item.id === 'users' && user?.role !== 'ADMINISTRADOR') {
+                return null;
+              }
+
+              return (
+                <NavLink
+                  key={item.id}
+                  to={item.path}
+                  onClick={() => item.id === 'tasks' ? onSelectProject(null) : null}
+                  className={({ isActive }) => `
+                    flex items-center gap-3 px-3 py-2 rounded-md text-xs font-bold transition-all
+                    ${isActive && (item.id !== 'tasks' || !activeProjectId)
+                      ? 'bg-green-50 text-green-700 shadow-sm ring-1 ring-green-100' 
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}
+                  `}
+                >
+                  {({ isActive }) => (
+                    <>
+                      <span className={isActive ? 'text-green-600' : 'text-gray-400'}>{item.icon}</span>
+                      {item.label}
+                    </>
+                  )}
+                </NavLink>
+              );
+            })}
           </div>
         </div>
 
@@ -152,7 +158,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
         
         <button 
-          onClick={handleLogout}
+          onClick={handleLogoutClick}
           className="w-full flex items-center gap-3 px-3 py-2 text-xs font-bold text-red-500 hover:bg-red-50 rounded-md transition-all group"
         >
           <LogOut size={16} className="group-hover:translate-x-0.5 transition-transform" />
