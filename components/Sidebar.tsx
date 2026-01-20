@@ -1,11 +1,11 @@
 
 import React from 'react';
-/* Fix: Import NavLink and useNavigate from react-router-dom */
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Logo } from './Logo';
 import { NAVIGATION_ITEMS } from '../constants';
 import { Project } from '../types';
-import { Plus, ChevronDown, Star, Settings, Trash2, Edit2 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext.tsx';
+import { Plus, ChevronDown, Star, Settings, Trash2, Edit2, LogOut } from 'lucide-react';
 
 interface SidebarProps {
   projects: Project[];
@@ -25,10 +25,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onEditProject 
 }) => {
   const navigate = useNavigate();
+  const { logout, user } = useAuth();
 
   const handleProjectClick = (id: string) => {
     onSelectProject(id);
     navigate('/tasks');
+  };
+
+  const handleLogout = () => {
+    if (confirm("Deseja realmente sair do sistema?")) {
+      logout();
+    }
   };
 
   return (
@@ -119,21 +126,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </nav>
 
-      <div className="p-4 border-t border-gray-100 bg-gray-50/50">
+      <div className="p-4 border-t border-gray-100 bg-gray-50/50 space-y-2">
         <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-white transition-all cursor-pointer border border-transparent hover:border-gray-200">
           <div className="relative">
             <img 
-              src="https://picsum.photos/seed/admin/100" 
+              src={user?.avatar || "https://picsum.photos/seed/admin/100"} 
               alt="User" 
               className="w-8 h-8 rounded-full ring-2 ring-white"
             />
           </div>
           <div className="flex-1 overflow-hidden">
-            <p className="text-xs font-extrabold text-gray-900 truncate">Admin Chabra</p>
-            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Workspace Owner</p>
+            <p className="text-xs font-extrabold text-gray-900 truncate">{user?.name || "Usuário"}</p>
+            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">{user?.role === 'ADMIN' ? 'Administrador' : 'Colaborador'}</p>
           </div>
           <Settings size={14} className="text-gray-300" />
         </div>
+        
+        <button 
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-3 py-2 text-xs font-bold text-red-500 hover:bg-red-50 rounded-md transition-all group"
+        >
+          <LogOut size={16} className="group-hover:translate-x-0.5 transition-transform" />
+          <span>Sair do Sistema</span>
+        </button>
       </div>
     </aside>
   );

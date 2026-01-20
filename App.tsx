@@ -1,18 +1,26 @@
 
 import React, { useState, useMemo } from 'react';
-/* Fix: Import HashRouter as Router, Routes, and Route from react-router-dom */
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext.tsx';
 import { Sidebar } from './components/Sidebar.tsx';
 import { TopBar } from './components/TopBar.tsx';
 import { Dashboard } from './pages/Dashboard.tsx';
 import { Tasks } from './pages/Tasks.tsx';
 import { Users } from './pages/Users.tsx';
 import { Templates } from './pages/Templates.tsx';
+import { Login } from './pages/Login.tsx';
 import { mockTasks as initialTasks, mockProjects as initialProjects } from './store.ts';
 import { Task, Project } from './types.ts';
 import { STATUS_CONFIG as initialStatusConfig } from './constants.tsx';
 
-const App: React.FC = () => {
+// Componente para proteger rotas privadas
+const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
+};
+
+const AppContent: React.FC = () => {
+  const { isAuthenticated } = useAuth();
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
@@ -92,43 +100,61 @@ const App: React.FC = () => {
     }
   };
 
+  if (!isAuthenticated) {
+    return (
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="*" element={<Navigate to="/login" />} />
+      </Routes>
+    );
+  }
+
   return (
-    <Router>
-      <div className="flex h-screen bg-gray-50 overflow-hidden">
-        <Sidebar 
-          projects={projects} 
-          activeProjectId={activeProjectId} 
-          onSelectProject={setActiveProjectId}
-          onAddProject={handleAddProject}
-          onDeleteProject={handleDeleteProject}
-          onEditProject={handleEditProject}
+    <div className="flex h-screen bg-gray-50 overflow-hidden">
+      <Sidebar 
+        projects={projects} 
+        activeProjectId={activeProjectId} 
+        onSelectProject={setActiveProjectId}
+        onAddProject={handleAddProject}
+        onDeleteProject={handleDeleteProject}
+        onEditProject={handleEditProject}
+      />
+      <div className="flex-1 flex flex-col min-w-0">
+        <TopBar 
+          title={activeProject ? activeProject.name : "Todos os Espaços"} 
+          onNewTask={handleCreateTask} 
         />
-        <div className="flex-1 flex flex-col min-w-0">
-          <TopBar 
-            title={activeProject ? activeProject.name : "Todos os Espaços"} 
-            onNewTask={handleCreateTask} 
-          />
-          <main className="flex-1 overflow-auto bg-[#F9F9F9]">
-            <Routes>
-              <Route path="/" element={<Dashboard tasks={tasks} />} />
-              <Route path="/tasks" element={
-                <Tasks 
-                  tasks={activeProjectId ? tasks.filter(t => t.projectId === activeProjectId) : tasks} 
-                  allTasks={tasks}
-                  onUpdateTasks={setTasks} 
-                  statusConfig={statusConfig} 
-                  statusOrder={statusOrder}
-                  onAddColumn={handleAddColumn}
-                  onDeleteColumn={handleDeleteColumn}
-                />
-              } />
-              <Route path="/users" element={<Users />} />
-              <Route path="/templates" element={<Templates />} />
-            </Routes>
-          </main>
-        </div>
+        <main className="flex-1 overflow-auto bg-[#F9F9F9]">
+          <Routes>
+            <Route path="/" element={<Dashboard tasks={tasks} />} />
+            <Route path="/tasks" element={
+              <Tasks 
+                tasks={activeProjectId ? tasks.filter(t => t.projectId === activeProjectId) : tasks} 
+                allTasks={tasks}
+                onUpdateTasks={setTasks} 
+                statusConfig={statusConfig} 
+                statusOrder={statusOrder}
+                onAddColumn={handleAddColumn}
+                onDeleteColumn={handleDeleteColumn}
+              />
+            } />
+            <Route path="/users" element={<Users />} />
+            <Route path="/templates" element={<Templates />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </main>
       </div>
-    </Router>
+    </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </AuthProvider>
   );
 };
 
