@@ -1,0 +1,7 @@
+{
+  "name": "CHABRA-Gestão",
+  "description": "A comprehensive project management system inspired by ClickUp, featuring granular permissions, multiple views (Kanban, List, Calendar), productivity dashboards, and task templates.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
