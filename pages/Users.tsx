@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { mockUsers as initialUsers } from '../store.ts';
-import { User, UserRole, RoleHierarchy } from '../types.ts';
+import { User, UserRole } from '../types.ts';
 import { useAuth } from '../context/AuthContext.tsx';
 import { 
   Shield, 
