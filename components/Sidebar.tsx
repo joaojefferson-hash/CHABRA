@@ -87,10 +87,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.15em]">
               Espaços
             </h3>
-            {can('DELETE_PROJECT') && (
+            {can('CREATE_PROJECT') && (
               <button 
                 onClick={onAddProject}
                 className="text-gray-400 hover:text-green-600 transition-colors"
+                title="Novo Espaço"
               >
                 <Plus size={14} />
               </button>

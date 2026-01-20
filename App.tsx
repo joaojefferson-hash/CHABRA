@@ -13,7 +13,6 @@ import { mockTasks as initialTasks, mockProjects as initialProjects } from './st
 import { Task, Project } from './types.ts';
 import { STATUS_CONFIG as initialStatusConfig } from './constants.tsx';
 
-// Componente para proteger rotas privadas
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
@@ -25,6 +24,7 @@ const AppContent: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   
+  // Estado global de Status para permitir customização
   const [statusConfig, setStatusConfig] = useState(initialStatusConfig);
   const [statusOrder, setStatusOrder] = useState<string[]>(['BACKLOG', 'TODO', 'IN_PROGRESS', 'REVIEW', 'BLOCKED', 'DONE']);
 
@@ -62,6 +62,7 @@ const AppContent: React.FC = () => {
   };
 
   const handleDeleteColumn = (id: string) => {
+    if (id === 'BACKLOG' || id === 'DONE') return alert("Status do sistema não podem ser removidos.");
     if (confirm("Deseja excluir esta coluna? As tarefas serão movidas para o Backlog.")) {
       setTasks(prev => prev.map(t => t.status === id ? { ...t, status: 'BACKLOG' } : t));
       setStatusOrder(prev => prev.filter(s => s !== id));

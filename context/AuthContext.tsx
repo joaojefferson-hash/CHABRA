@@ -8,7 +8,7 @@ interface AuthContextType {
   login: (email: string, pass: string) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
-  can: (action: 'MANAGE_USERS' | 'DELETE_PROJECT' | 'APPROVE_TASK' | 'EDIT_OTHERS_TASKS' | 'CREATE_TASK') => boolean;
+  can: (action: 'MANAGE_USERS' | 'DELETE_PROJECT' | 'APPROVE_TASK' | 'EDIT_OTHERS_TASKS' | 'CREATE_TASK' | 'CREATE_PROJECT') => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -65,6 +65,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       case 'MANAGE_USERS':
         return user.role === 'ADMINISTRADOR';
       case 'DELETE_PROJECT':
+        return level <= 1;
+      case 'CREATE_PROJECT':
         return level <= 1;
       case 'APPROVE_TASK':
         return level <= 1;
