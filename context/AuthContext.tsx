@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { User, UserRole, RoleHierarchy } from '../types.ts';
 import { mockUsers } from '../store.ts';
 
@@ -8,51 +8,72 @@ interface AuthContextType {
   login: (email: string, pass: string) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
-  can: (action: 'MANAGE_USERS' | 'DELETE_PROJECT' | 'APPROVE_TASK' | 'EDIT_OTHERS_TASKS' | 'CREATE_TASK' | 'CREATE_PROJECT') => boolean;
+  isLoading: boolean;
+  can: (action: 'MANAGE_USERS' | 'DELETE_PROJECT' | 'APPROVE_TASK' | 'EDIT_OTHERS_TASKS' | 'CREATE_TASK' | 'CREATE_PROJECT' | 'VIEW_PROJECTS') => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    try {
-      const saved = localStorage.getItem('chabra_user');
-      return saved ? JSON.parse(saved) : null;
-    } catch (e) {
-      return null;
-    }
-  });
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulando verificação de sessão inicial (reidratação)
+    const initAuth = () => {
+      try {
+        const saved = localStorage.getItem('chabra_user');
+        if (saved) {
+          setUser(JSON.parse(saved));
+        }
+      } catch (e) {
+        console.error("Erro ao carregar sessão", e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    initAuth();
+  }, []);
 
   const login = async (email: string, pass: string): Promise<boolean> => {
-    await new Promise(resolve => setTimeout(resolve, 800));
+    setIsLoading(true);
+    // Simulação de delay de rede para backend
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Busca na lista de usuários (incluindo os que possam ter sido criados na sessão)
-    const foundUser = mockUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+    // Aqui no futuro trocaremos pelo supabase.auth.signInWithPassword
+    const localUsersStr = localStorage.getItem('chabra_users_list');
+    const allAvailableUsers = localUsersStr ? JSON.parse(localUsersStr) : mockUsers;
+    
+    const foundUser = allAvailableUsers.find((u: any) => u.email.toLowerCase() === email.toLowerCase());
     
     if (foundUser) {
-      if (foundUser.role === 'ADMINISTRADOR' && pass !== 'chabra2024') {
+      if (foundUser.status === 'DISABLED') {
+        setIsLoading(false);
+        throw new Error('Conta suspensa. Entre em contato com o administrador.');
+      }
+
+      // Validação de senha master para o admin mockado
+      if (foundUser.role === 'ADMINISTRADOR' && email === 'admin@chabra.com.br' && pass !== 'chabra2024') {
+        setIsLoading(false);
         return false;
       }
       
       setUser(foundUser);
       localStorage.setItem('chabra_user', JSON.stringify(foundUser));
+      setIsLoading(false);
       return true;
     }
     
+    setIsLoading(false);
     return false;
   };
 
   const logout = () => {
-    // 1. Limpa o estado local do React
-    setUser(null);
-    
-    // 2. Limpa persistência física
+    // Limpeza atômica de todos os estados de sessão
     localStorage.removeItem('chabra_user');
-    localStorage.removeItem('chabra_users_list'); // Opcional: limpa lista de usuários se quiser reset total
-    sessionStorage.clear();
-    
-    // 3. Força o redirecionamento bruto para garantir que o Router resete
-    window.location.href = '/';
+    sessionStorage.clear(); // Limpa caches temporários
+    setUser(null);
+    // O redirecionamento ocorre automaticamente via PrivateRoute
   };
 
   const can = (action: string): boolean => {
@@ -62,25 +83,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const level = RoleHierarchy[user.role];
 
     switch (action) {
-      case 'MANAGE_USERS':
-        return user.role === 'ADMINISTRADOR';
-      case 'DELETE_PROJECT':
-        return level <= 1;
-      case 'CREATE_PROJECT':
-        return level <= 1;
-      case 'APPROVE_TASK':
-        return level <= 1;
-      case 'EDIT_OTHERS_TASKS':
-        return level <= 2;
-      case 'CREATE_TASK':
-        return level <= 4;
-      default:
-        return false;
+      case 'MANAGE_USERS': return user.role === 'ADMINISTRADOR';
+      case 'DELETE_PROJECT': return level <= 1;
+      case 'CREATE_PROJECT': return level <= 1;
+      case 'VIEW_PROJECTS': return true; 
+      case 'APPROVE_TASK': return level <= 1; 
+      case 'EDIT_OTHERS_TASKS': return level <= 2;
+      case 'CREATE_TASK': return level <= 4;
+      default: return false;
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, can }}>
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, isLoading, can }}>
       {children}
     </AuthContext.Provider>
   );

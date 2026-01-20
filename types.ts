@@ -34,6 +34,13 @@ export interface Attachment {
   createdAt: string;
 }
 
+export interface Comment {
+  id: string;
+  authorId: string;
+  text: string;
+  createdAt: string;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -49,6 +56,7 @@ export interface Task {
   tags: string[];
   projectId: string;
   attachments?: Attachment[];
+  comments?: Comment[];
 }
 
 export interface Project {
@@ -56,6 +64,7 @@ export interface Project {
   name: string;
   color: string;
   description?: string;
+  observations?: string;
 }
 
 export interface Notification {

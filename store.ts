@@ -83,7 +83,11 @@ export const mockTasks: Task[] = [
       { id: 's1', title: 'Ler PDF da NR-10', isCompleted: true },
       { id: 's2', title: 'Redigir rascunho', isCompleted: false }
     ],
-    attachments: []
+    attachments: [],
+    comments: [
+      { id: 'c1', authorId: 'u1', text: 'Favor revisar a NR-10 atualizada semana passada.', createdAt: '2024-05-02T10:00:00Z' },
+      { id: 'c2', authorId: 'u2', text: 'Entendido, já incluí no cronograma.', createdAt: '2024-05-02T11:30:00Z' }
+    ]
   },
   {
     id: 'task-2',
@@ -99,7 +103,8 @@ export const mockTasks: Task[] = [
     projectId: 'p1',
     tags: ['Treinamento'],
     subtasks: [],
-    attachments: []
+    attachments: [],
+    comments: []
   }
 ];
 
