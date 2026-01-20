@@ -1,10 +1,10 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { X, CheckCircle2, Circle, Plus, Trash2, Calendar, User, Tag, Flag, MessageSquare, Clock, Paperclip, Upload, FileText, ExternalLink, Check } from 'lucide-react';
-import { Task, Subtask, Priority, Attachment } from '../types';
-import { STATUS_CONFIG, PRIORITY_CONFIG } from '../constants';
-import { mockUsers } from '../store';
+import { Task, Subtask, Priority, Attachment } from '../types.ts';
+import { STATUS_CONFIG, PRIORITY_CONFIG } from '../constants.tsx';
+import { mockUsers } from '../store.ts';
 
 interface TaskDetailsModalProps {
   task: Task;
@@ -16,6 +16,8 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ task, onClos
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTagLabel, setNewTagLabel] = useState('');
+  
+  // Hooks de ref declarados no topo seguindo as regras do React
   const fileInputRef = useRef<HTMLInputElement>(null);
   const tagInputRef = useRef<HTMLInputElement>(null);
   
@@ -108,11 +110,10 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ task, onClos
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
       <div className="bg-white w-full max-w-5xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
-        {/* Header */}
         <div className="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-white">
           <div className="flex items-center gap-4">
-            <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${STATUS_CONFIG[task.status].color} text-white shadow-sm shadow-black/10`}>
-              {STATUS_CONFIG[task.status].label}
+            <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${STATUS_CONFIG[task.status]?.color || 'bg-gray-400'} text-white shadow-sm shadow-black/10`}>
+              {STATUS_CONFIG[task.status]?.label || task.status}
             </span>
             <div className="flex items-center gap-2">
               <span className="text-gray-400 text-sm font-medium">#{displayTaskId}</span>
@@ -126,7 +127,6 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ task, onClos
         </div>
 
         <div className="flex-1 overflow-y-auto flex flex-col lg:flex-row">
-          {/* Main Content */}
           <div className="flex-[2.5] p-8 lg:p-10 border-r border-gray-100">
             <div className="flex items-start justify-between gap-6 mb-8">
               <div className="space-y-1 flex-1">
@@ -155,7 +155,6 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ task, onClos
               />
             </div>
 
-            {/* Subtasks Section */}
             <div className="mb-10">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
@@ -201,7 +200,6 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ task, onClos
               </form>
             </div>
 
-            {/* Attachments Section */}
             <div className="mb-4">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
@@ -259,12 +257,10 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ task, onClos
             </div>
           </div>
 
-          {/* Sidebar Info */}
           <div className="flex-1 bg-gray-50/50 p-8 lg:p-10 space-y-10">
             <div>
               <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6">Informações</h3>
               <div className="space-y-6">
-                {/* Assignee */}
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center border border-gray-100 text-gray-400 shadow-sm overflow-hidden">
                     {assignee?.avatar ? (
@@ -279,7 +275,6 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ task, onClos
                   </div>
                 </div>
 
-                {/* Due Date */}
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center border border-gray-100 text-blue-500 shadow-sm">
                     <Calendar size={20} />
@@ -295,7 +290,6 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ task, onClos
                   </div>
                 </div>
 
-                {/* Created At */}
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center border border-gray-100 text-purple-500 shadow-sm">
                     <Clock size={20} />
@@ -306,17 +300,16 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ task, onClos
                   </div>
                 </div>
 
-                {/* Priority */}
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center border border-gray-100 shadow-sm">
-                    <Flag size={20} className={PRIORITY_CONFIG[task.priority].iconColor} />
+                    <Flag size={20} className={PRIORITY_CONFIG[task.priority]?.iconColor || 'text-gray-400'} />
                   </div>
                   <div className="flex-1">
                     <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Prioridade</p>
                     <select
                       value={task.priority}
                       onChange={handlePriorityChange}
-                      className={`text-sm font-black bg-transparent border-none focus:ring-0 rounded-lg px-0 cursor-pointer hover:underline transition-all w-full outline-none appearance-none ${PRIORITY_CONFIG[task.priority].iconColor}`}
+                      className={`text-sm font-black bg-transparent border-none focus:ring-0 rounded-lg px-0 cursor-pointer hover:underline transition-all w-full outline-none appearance-none ${PRIORITY_CONFIG[task.priority]?.iconColor || 'text-gray-400'}`}
                     >
                       {Object.entries(PRIORITY_CONFIG).map(([key, config]) => (
                         <option key={key} value={key} className="text-gray-900 font-bold">
@@ -327,7 +320,6 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ task, onClos
                   </div>
                 </div>
 
-                {/* Tags Management */}
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center border border-gray-100 text-orange-500 shadow-sm">
                     <Tag size={20} />

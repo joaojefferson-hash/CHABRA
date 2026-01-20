@@ -1,15 +1,16 @@
 
 import React, { useState, useMemo } from 'react';
+/* Fix: Import HashRouter as Router, Routes, and Route from react-router-dom */
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
-import { Sidebar } from './components/Sidebar';
-import { TopBar } from './components/TopBar';
-import { Dashboard } from './pages/Dashboard';
-import { Tasks } from './pages/Tasks';
-import { Users } from './pages/Users';
-import { Templates } from './pages/Templates';
-import { mockTasks as initialTasks, mockProjects as initialProjects } from './store';
-import { Task, Project } from './types';
-import { STATUS_CONFIG as initialStatusConfig } from './constants';
+import { Sidebar } from './components/Sidebar.tsx';
+import { TopBar } from './components/TopBar.tsx';
+import { Dashboard } from './pages/Dashboard.tsx';
+import { Tasks } from './pages/Tasks.tsx';
+import { Users } from './pages/Users.tsx';
+import { Templates } from './pages/Templates.tsx';
+import { mockTasks as initialTasks, mockProjects as initialProjects } from './store.ts';
+import { Task, Project } from './types.ts';
+import { STATUS_CONFIG as initialStatusConfig } from './constants.tsx';
 
 const App: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
@@ -28,14 +29,14 @@ const App: React.FC = () => {
       id: `task-${Date.now()}`,
       title: 'Nova Tarefa',
       description: '',
-      status: statusOrder[1] || 'TODO', // Padrão para a segunda coluna (geralmente TODO)
+      status: 'TODO',
       priority: 'NORMAL',
       assigneeId: 'u1',
       creatorId: 'u1',
       dueDate: new Date().toISOString().split('T')[0],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      projectId: activeProjectId || projects[0]?.id || 'default',
+      projectId: activeProjectId || (projects.length > 0 ? projects[0].id : 'p1'),
       tags: [],
       subtasks: [],
       attachments: []
@@ -53,7 +54,7 @@ const App: React.FC = () => {
   };
 
   const handleDeleteColumn = (id: string) => {
-    if (confirm("Deseja excluir esta coluna? As tarefas nela serão movidas para o Backlog.")) {
+    if (confirm("Deseja excluir esta coluna? As tarefas serão movidas para o Backlog.")) {
       setTasks(prev => prev.map(t => t.status === id ? { ...t, status: 'BACKLOG' } : t));
       setStatusOrder(prev => prev.filter(s => s !== id));
       const newConfig = { ...statusConfig };
@@ -75,7 +76,7 @@ const App: React.FC = () => {
   };
 
   const handleDeleteProject = (id: string) => {
-    if (confirm("Deseja realmente excluir este Espaço e todas as suas tarefas?")) {
+    if (confirm("Deseja realmente excluir este Espaço?")) {
       setProjects(prev => prev.filter(p => p.id !== id));
       setTasks(prev => prev.filter(t => t.projectId !== id));
       if (activeProjectId === id) setActiveProjectId(null);
@@ -93,7 +94,7 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <div className="flex min-h-screen bg-gray-50">
+      <div className="flex h-screen bg-gray-50 overflow-hidden">
         <Sidebar 
           projects={projects} 
           activeProjectId={activeProjectId} 
@@ -102,12 +103,12 @@ const App: React.FC = () => {
           onDeleteProject={handleDeleteProject}
           onEditProject={handleEditProject}
         />
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-w-0">
           <TopBar 
             title={activeProject ? activeProject.name : "Todos os Espaços"} 
             onNewTask={handleCreateTask} 
           />
-          <main className="flex-1 overflow-x-hidden">
+          <main className="flex-1 overflow-auto bg-[#F9F9F9]">
             <Routes>
               <Route path="/" element={<Dashboard tasks={tasks} />} />
               <Route path="/tasks" element={

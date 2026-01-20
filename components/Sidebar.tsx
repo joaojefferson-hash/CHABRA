@@ -1,5 +1,6 @@
 
 import React from 'react';
+/* Fix: Import NavLink and useNavigate from react-router-dom */
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Logo } from './Logo';
 import { NAVIGATION_ITEMS } from '../constants';
