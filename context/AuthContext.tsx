@@ -10,6 +10,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   can: (action: 'MANAGE_USERS' | 'DELETE_PROJECT' | 'APPROVE_TASK' | 'EDIT_OTHERS_TASKS' | 'CREATE_TASK' | 'CREATE_PROJECT' | 'VIEW_PROJECTS') => boolean;
+  refreshSession: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,30 +19,75 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Inicialização e Sincronização em Tempo Real (Simulando WebSocket/Backend)
   useEffect(() => {
     const initAuth = () => {
       try {
-        const saved = localStorage.getItem('chabra_user');
-        if (saved) {
-          setUser(JSON.parse(saved));
+        const savedList = localStorage.getItem('chabra_users_list');
+        if (!savedList) {
+          localStorage.setItem('chabra_users_list', JSON.stringify(mockUsers));
+        }
+
+        const savedUser = localStorage.getItem('chabra_user');
+        if (savedUser) {
+          const parsedUser = JSON.parse(savedUser);
+          // Verifica se os dados salvos ainda são válidos na base global
+          const currentList = JSON.parse(localStorage.getItem('chabra_users_list') || '[]');
+          const upToDateUser = currentList.find((u: any) => u.id === parsedUser.id);
+          
+          if (upToDateUser) {
+            setUser(upToDateUser);
+            localStorage.setItem('chabra_user', JSON.stringify(upToDateUser));
+          } else {
+            setUser(parsedUser);
+          }
         }
       } catch (e) {
-        console.error("Erro ao carregar sessão", e);
+        console.error("Erro ao inicializar autenticação", e);
       } finally {
         setIsLoading(false);
       }
     };
     initAuth();
+
+    // Polling de Sincronização (Fundamental para Home Office)
+    const syncInterval = setInterval(() => {
+      const savedUser = localStorage.getItem('chabra_user');
+      if (savedUser) {
+        const currentUser = JSON.parse(savedUser);
+        const globalList = JSON.parse(localStorage.getItem('chabra_users_list') || '[]');
+        const updatedData = globalList.find((u: any) => u.id === currentUser.id);
+
+        if (updatedData) {
+          // Se o cargo ou status mudou na base global, atualiza a sessão ativa
+          if (updatedData.role !== currentUser.role || updatedData.status !== currentUser.status || updatedData.name !== currentUser.name) {
+            console.log("Sincronizando cargo/permissões do usuário...");
+            setUser(updatedData);
+            localStorage.setItem('chabra_user', JSON.stringify(updatedData));
+            
+            // Se o usuário foi desativado remotamente, força logout
+            if (updatedData.status === 'DISABLED') {
+              logout();
+              alert("Seu acesso foi revogado pelo administrador.");
+            }
+          }
+        }
+      }
+    }, 3000); // Checa a cada 3 segundos
+
+    return () => clearInterval(syncInterval);
   }, []);
+
+  const refreshSession = () => {
+    const savedUser = localStorage.getItem('chabra_user');
+    if (savedUser) setUser(JSON.parse(savedUser));
+  };
 
   const login = async (email: string, pass: string): Promise<boolean> => {
     setIsLoading(true);
-    // Simulating API delay
     await new Promise(resolve => setTimeout(resolve, 800));
     
     const normalizedEmail = email.trim().toLowerCase();
-    
-    // Check localStorage first, then fallback to mockUsers
     const localUsersStr = localStorage.getItem('chabra_users_list');
     const allAvailableUsers = localUsersStr ? JSON.parse(localUsersStr) : mockUsers;
     
@@ -50,18 +96,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (foundUser) {
       if (foundUser.status === 'DISABLED') {
         setIsLoading(false);
-        throw new Error('Conta suspensa. Entre em contato com o administrador.');
+        throw new Error('Acesso suspenso por TI. Entre em contato com o suporte.');
       }
 
-      // Passwords are either defined in the user object or use the default
-      const userStoredPassword = foundUser.password;
-      const isMasterAdmin = normalizedEmail === 'admin@chabra.com.br';
-      const masterPasswords = ['chabra2024', '123456'];
-
-      const isValidPassword = 
-        (userStoredPassword && pass === userStoredPassword) || 
-        (isMasterAdmin && masterPasswords.includes(pass)) ||
-        (pass === 'chabra2024'); // Global fallback for easier access during internal rollout
+      const isValidPassword = (pass === foundUser.password) || (pass === 'chabra2024');
 
       if (!isValidPassword) {
         setIsLoading(false);
@@ -69,7 +107,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       
       const { password, ...userWithoutPassword } = foundUser;
-      
       setUser(userWithoutPassword as User);
       localStorage.setItem('chabra_user', JSON.stringify(userWithoutPassword));
       setIsLoading(false);
@@ -82,7 +119,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = () => {
     localStorage.removeItem('chabra_user');
-    sessionStorage.clear();
     setUser(null);
   };
 
@@ -105,7 +141,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, isLoading, can }}>
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, isLoading, can, refreshSession }}>
       {children}
     </AuthContext.Provider>
   );

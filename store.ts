@@ -73,14 +73,31 @@ export const mockTasks: Task[] = [
     subtasks: [],
     attachments: [],
     comments: []
+  },
+  {
+    id: 'task-backlog-1',
+    workspaceId: 'w1',
+    projectId: 'p1',
+    title: 'Triagem de Documentos Home Office',
+    description: 'Organizar documentos pendentes enviados por e-mail.',
+    status: 'BACKLOG',
+    priority: 'NORMAL',
+    assigneeId: 'u3',
+    creatorId: 'u1',
+    dueDate: '2024-12-31',
+    createdAt: '2024-05-18',
+    updatedAt: '2024-05-18',
+    tags: ['HOME OFFICE'],
+    subtasks: [],
+    attachments: []
   }
 ];
 
 export const mockNotifications: Notification[] = [
   {
     id: 'n1',
-    title: 'Boas-vindas',
-    message: 'Bem-vindo ao novo ambiente CHABRA Gestão.',
+    title: 'Acesso Remoto Liberado',
+    message: 'O portal CHABRA agora está acessível para toda a equipe em home office.',
     type: 'SUCCESS',
     read: false,
     timestamp: new Date().toISOString()
@@ -100,11 +117,5 @@ export const mockTemplates: TaskTemplate[] = [
     name: 'Relatório Mensal de Segurança',
     defaultDescription: 'Template para vistorias de rotina em instalações industriais.',
     defaultSubtasks: ['Inspecionar painéis elétricos', 'Verificar sinalização de emergência', 'Checar validade dos extintores']
-  },
-  {
-    id: 'temp-2',
-    name: 'Processo de Onboarding',
-    defaultDescription: 'Checklist para integração de novos técnicos na equipe.',
-    defaultSubtasks: ['Apresentar normas internas', 'Entregar EPIs e uniformes', 'Configurar acesso aos sistemas']
   }
 ];

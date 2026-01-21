@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { mockUsers as initialUsers } from '../store.ts';
 import { User, UserRole } from '../types.ts';
 import { useAuth } from '../context/AuthContext.tsx';
+import { useNotifications } from '../context/NotificationContext.tsx';
 import { 
   Shield, UserPlus, X, Users as LucideUsers, Edit2, UserX, UserCheck, Trash2, 
   AlertCircle, Mail, MoreVertical, Search, Filter, Check, UserCircle, Lock, Eye, EyeOff
@@ -15,7 +16,6 @@ const UserModal: React.FC<{
 }> = ({ user, onClose, onSave }) => {
   const { can } = useAuth();
   
-  // Recuperar a senha do localStorage se estiver editando, pois ela não fica no estado global por segurança
   const getStoredPassword = () => {
     if (!user) return '';
     const localUsersStr = localStorage.getItem('chabra_users_list');
@@ -38,7 +38,7 @@ const UserModal: React.FC<{
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !password) {
-      alert("Por favor, preencha todos os campos, incluindo a senha.");
+      alert("Por favor, preencha todos os campos.");
       return;
     }
     onSave({ 
@@ -56,7 +56,7 @@ const UserModal: React.FC<{
         <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-green-100 text-green-600 rounded-xl">
-              <UserPlus size={20} />
+              <LucideUsers size={20} />
             </div>
             <h3 className="text-xl font-black text-gray-900">{user ? 'Editar Membro' : 'Novo Membro'}</h3>
           </div>
@@ -69,7 +69,7 @@ const UserModal: React.FC<{
             <div className="bg-amber-50 border border-amber-100 rounded-2xl p-3 flex items-start gap-2 mb-2">
               <Lock size={14} className="text-amber-600 mt-0.5" />
               <p className="text-[10px] font-bold text-amber-700 leading-tight uppercase">
-                Apenas Administradores podem alterar cargos e status do sistema.
+                Apenas Administradores podem alterar cargos e status.
               </p>
             </div>
           )}
@@ -79,8 +79,8 @@ const UserModal: React.FC<{
             <input 
               required 
               autoFocus
-              className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-500/50 transition-all" 
-              placeholder="Ex: João Silva"
+              className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-500 transition-all" 
+              placeholder="Ex: Isabela Esteves"
               value={name} 
               onChange={e => setName(e.target.value)} 
             />
@@ -91,7 +91,7 @@ const UserModal: React.FC<{
             <input 
               required 
               type="email" 
-              className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-500/50 transition-all" 
+              className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-500 transition-all" 
               placeholder="exemplo@chabra.com.br"
               value={email} 
               onChange={e => setEmail(e.target.value)} 
@@ -99,13 +99,13 @@ const UserModal: React.FC<{
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Senha de Acesso</label>
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Senha</label>
             <div className="relative">
               <input 
                 required 
                 type={showPassword ? "text" : "password"} 
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-500/50 transition-all pr-12" 
-                placeholder="Defina a senha do usuário"
+                className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-500 transition-all pr-12" 
+                placeholder="Senha do usuário"
                 value={password} 
                 onChange={e => setPassword(e.target.value)} 
               />
@@ -120,34 +120,26 @@ const UserModal: React.FC<{
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between px-1">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Cargo no Sistema</label>
-              {!isAdmin && <Shield size={12} className="text-gray-300" />}
-            </div>
-            <div className="relative">
-              <select 
-                disabled={!isAdmin}
-                className={`w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-black outline-none transition-all appearance-none
-                  ${!isAdmin ? 'opacity-60 cursor-not-allowed grayscale-[0.5]' : 'focus:ring-4 focus:ring-green-500/10 focus:border-green-500/50 cursor-pointer'}
-                `} 
-                value={role} 
-                onChange={e => setRole(e.target.value as UserRole)}
-              >
-                <option value="ADMINISTRADOR">Administrador (Total)</option>
-                <option value="GERENTE">Gerente (Gestão)</option>
-                <option value="SUPERVISOR">Supervisor (Equipe)</option>
-                <option value="TECNICO">Técnico em Seg. Trabalho</option>
-                <option value="ANALISTA">Analista (Operacional)</option>
-              </select>
-            </div>
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Cargo no Sistema</label>
+            <select 
+              disabled={!isAdmin}
+              className={`w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-black outline-none transition-all appearance-none ${!isAdmin ? 'opacity-60 grayscale-[0.5]' : 'focus:ring-4 focus:ring-green-500/10 focus:border-green-500 cursor-pointer'}`} 
+              value={role} 
+              onChange={e => setRole(e.target.value as UserRole)}
+            >
+              <option value="ADMINISTRADOR">Administrador (Total)</option>
+              <option value="GERENTE">Gerente (Gestão)</option>
+              <option value="SUPERVISOR">Supervisor (Equipe)</option>
+              <option value="TECNICO">Técnico em Seg. Trabalho</option>
+              <option value="ANALISTA">Analista (Operacional)</option>
+            </select>
           </div>
 
           <button 
             type="submit" 
             className="w-full py-5 bg-green-600 hover:bg-green-700 text-white rounded-[1.5rem] font-black text-sm shadow-xl shadow-green-200 mt-4 transition-all active:scale-95 flex items-center justify-center gap-3"
           >
-            {user ? <Check size={20} /> : <UserPlus size={20} />}
-            {user ? 'Atualizar Membro' : 'Cadastrar Membro'}
+            {user ? 'Salvar Alterações' : 'Cadastrar Membro'}
           </button>
         </form>
       </div>
@@ -156,7 +148,8 @@ const UserModal: React.FC<{
 };
 
 export const Users: React.FC = () => {
-  const { user: currentUser, can } = useAuth();
+  const { user: currentUser, can, refreshSession } = useAuth();
+  const { addNotification } = useNotifications();
   const [users, setUsers] = useState<User[]>(() => {
     const saved = localStorage.getItem('chabra_users_list');
     return saved ? JSON.parse(saved) : initialUsers;
@@ -171,6 +164,13 @@ export const Users: React.FC = () => {
   const saveToStorage = (newUsers: User[]) => {
     setUsers(newUsers);
     localStorage.setItem('chabra_users_list', JSON.stringify(newUsers));
+    
+    // Se o usuário editado for o próprio logado, atualiza o localStorage da sessão dele também
+    const updatedSelf = newUsers.find(u => u.id === currentUser?.id);
+    if (updatedSelf) {
+      localStorage.setItem('chabra_user', JSON.stringify(updatedSelf));
+      refreshSession();
+    }
   };
 
   const filteredUsers = useMemo(() => {
@@ -187,6 +187,11 @@ export const Users: React.FC = () => {
     if (editingUser) {
       const updated = users.map(u => u.id === editingUser.id ? { ...u, ...userData } : u);
       saveToStorage(updated);
+      addNotification({
+        title: 'Usuário Atualizado',
+        message: `O cargo de ${userData.name} foi alterado para ${userData.role}.`,
+        type: 'SUCCESS'
+      });
       setEditingUser(null);
     } else {
       const newUser: User = { 
@@ -196,19 +201,21 @@ export const Users: React.FC = () => {
         permissions: [] 
       };
       saveToStorage([newUser, ...users]);
+      addNotification({
+        title: 'Novo Membro',
+        message: `${userData.name} foi adicionado à equipe CHABRA.`,
+        type: 'SUCCESS'
+      });
     }
     setIsModalOpen(false);
   };
 
   const toggleStatus = (id: string) => {
     if (!can('MANAGE_USERS')) {
-      alert("Ação negada: Você não tem permissão para alterar o status de membros.");
+      alert("Permissão negada.");
       return;
     }
-    if (id === currentUser?.id) {
-      alert("Você não pode desativar seu próprio acesso.");
-      return;
-    }
+    const targetUser = users.find(u => u.id === id);
     const updated = users.map(u => u.id === id ? { 
       ...u, 
       status: (u.status === 'DISABLED' ? 'ACTIVE' : 'DISABLED') as any 
@@ -218,15 +225,8 @@ export const Users: React.FC = () => {
   };
 
   const deleteUser = (id: string) => {
-    if (!can('MANAGE_USERS')) {
-      alert("Ação negada: Apenas administradores podem remover membros.");
-      return;
-    }
-    if (id === currentUser?.id) {
-      alert("Ação negada: Você não pode excluir sua própria conta.");
-      return;
-    }
-    if (confirm("ATENÇÃO: Deseja realmente remover permanentemente este membro? Esta ação não pode ser desfeita.")) {
+    if (!can('MANAGE_USERS') || id === currentUser?.id) return;
+    if (confirm("Remover permanentemente este membro?")) {
       saveToStorage(users.filter(u => u.id !== id));
       setOpenMenuId(null);
     }
@@ -254,7 +254,7 @@ export const Users: React.FC = () => {
           <h2 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
             Gestão de Membros <span className="text-sm font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full">{users.length}</span>
           </h2>
-          <p className="text-sm text-gray-500 font-medium mt-1">Controle de acesso, cargos e permissões da equipe CHABRA.</p>
+          <p className="text-sm text-gray-500 font-medium mt-1">Sincronização em tempo real para equipes em Home Office.</p>
         </div>
         
         {can('MANAGE_USERS') && (
@@ -272,7 +272,7 @@ export const Users: React.FC = () => {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-green-500 transition-colors" size={20} />
           <input 
             type="text" 
-            placeholder="Pesquisar por nome, e-mail ou cargo..."
+            placeholder="Pesquisar..."
             className="w-full pl-12 pr-6 py-4 bg-white border border-gray-100 rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-500 shadow-sm transition-all"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -300,19 +300,12 @@ export const Users: React.FC = () => {
           <div key={u.id} className={`bg-white p-6 rounded-[2rem] border transition-all group relative ${u.status === 'DISABLED' ? 'opacity-75 grayscale-[0.5]' : 'hover:shadow-2xl hover:shadow-green-500/5 hover:border-green-100'}`}>
             <div className="flex items-start justify-between mb-5">
               <div className="relative">
-                <img 
-                  src={u.avatar} 
-                  className={`w-20 h-20 rounded-[1.5rem] object-cover border-4 border-white shadow-lg ${u.status === 'DISABLED' ? 'grayscale opacity-60' : ''}`} 
-                  alt={u.name} 
-                />
+                <img src={u.avatar} className={`w-20 h-20 rounded-[1.5rem] object-cover border-4 border-white shadow-lg ${u.status === 'DISABLED' ? 'grayscale opacity-60' : ''}`} alt={u.name} />
                 <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-4 border-white shadow-sm ${u.status === 'ACTIVE' ? 'bg-green-500' : 'bg-red-500'}`} />
               </div>
               
               <div className="relative">
-                <button 
-                  onClick={() => setOpenMenuId(openMenuId === u.id ? null : u.id)} 
-                  className={`p-2 rounded-xl transition-colors ${openMenuId === u.id ? 'bg-gray-100 text-gray-900' : 'text-gray-300 hover:text-gray-600 hover:bg-gray-50'}`}
-                >
+                <button onClick={() => setOpenMenuId(openMenuId === u.id ? null : u.id)} className={`p-2 rounded-xl transition-colors ${openMenuId === u.id ? 'bg-gray-100 text-gray-900' : 'text-gray-300 hover:text-gray-600 hover:bg-gray-50'}`}>
                   <MoreVertical size={20} />
                 </button>
                 
@@ -320,27 +313,18 @@ export const Users: React.FC = () => {
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setOpenMenuId(null)} />
                     <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 py-3 animate-in fade-in slide-in-from-top-2">
-                      <button 
-                        onClick={() => { setEditingUser(u); setIsModalOpen(true); setOpenMenuId(null); }} 
-                        className="w-full flex items-center gap-3 px-4 py-3 text-xs font-black text-gray-600 hover:bg-gray-50"
-                      >
+                      <button onClick={() => { setEditingUser(u); setIsModalOpen(true); setOpenMenuId(null); }} className="w-full flex items-center gap-3 px-4 py-3 text-xs font-black text-gray-600 hover:bg-gray-50">
                         <Edit2 size={16} className="text-blue-500" /> Editar Detalhes
                       </button>
                       
                       {can('MANAGE_USERS') && (
                         <>
-                          <button 
-                            onClick={() => toggleStatus(u.id)} 
-                            className={`w-full flex items-center gap-3 px-4 py-3 text-xs font-black hover:bg-gray-50 ${u.status === 'DISABLED' ? 'text-green-600' : 'text-orange-600'}`}
-                          >
+                          <button onClick={() => toggleStatus(u.id)} className={`w-full flex items-center gap-3 px-4 py-3 text-xs font-black hover:bg-gray-50 ${u.status === 'DISABLED' ? 'text-green-600' : 'text-orange-600'}`}>
                             {u.status === 'DISABLED' ? <UserCheck size={16} /> : <UserX size={16} />}
                             {u.status === 'DISABLED' ? 'Ativar Acesso' : 'Suspender Acesso'}
                           </button>
                           {u.id !== currentUser?.id && (
-                            <button 
-                              onClick={() => deleteUser(u.id)} 
-                              className="w-full flex items-center gap-3 px-4 py-3 text-xs font-black text-red-500 hover:bg-red-50"
-                            >
+                            <button onClick={() => deleteUser(u.id)} className="w-full flex items-center gap-3 px-4 py-3 text-xs font-black text-red-500 hover:bg-red-50">
                               <Trash2 size={16} /> Remover Membro
                             </button>
                           )}
