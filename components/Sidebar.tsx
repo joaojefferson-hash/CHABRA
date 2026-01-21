@@ -1,9 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Logo } from './Logo';
 import { NAVIGATION_ITEMS } from '../constants';
-import { Project, Workspace } from '../types';
+import { Project, Workspace, UserRole } from '../types';
 import { useAuth } from '../context/AuthContext.tsx';
 import { 
   Plus, Star, Trash2, Edit2, LogOut, Shield, Lock, Info, 
@@ -47,6 +47,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onSelectWorkspace(id);
     onSelectProject(null);
     setShowWorkspaceMenu(false);
+  };
+
+  const getRoleColor = (role: UserRole | undefined) => {
+    switch (role) {
+      case 'ADMINISTRADOR': return 'text-red-600';
+      case 'GERENTE': return 'text-blue-600';
+      case 'SUPERVISOR': return 'text-orange-600';
+      case 'TECNICO': return 'text-green-600';
+      default: return 'text-gray-500';
+    }
   };
 
   return (
@@ -144,10 +154,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Footer Profile */}
       <div className="p-4 bg-white border-t border-gray-200">
         <div className="flex items-center gap-3 p-2 rounded-2xl bg-gray-50 border border-gray-100">
-          <img src={user?.avatar} className="w-9 h-9 rounded-xl shadow-sm" alt="Profile" />
+          <img src={user?.avatar} className="w-9 h-9 rounded-xl shadow-sm border border-white" alt="Profile" />
           <div className="flex-1 min-w-0">
             <p className="text-xs font-black text-gray-900 truncate">{user?.name}</p>
-            <p className="text-[9px] text-green-600 font-black uppercase tracking-widest">{user?.role}</p>
+            <p className={`text-[9px] font-black uppercase tracking-widest ${getRoleColor(user?.role)}`}>
+              {user?.role}
+            </p>
           </div>
           <button onClick={logout} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all">
             <LogOut size={16} />

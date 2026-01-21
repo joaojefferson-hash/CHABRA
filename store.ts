@@ -42,7 +42,7 @@ export const mockUsers: (User & { password?: string })[] = [
     name: 'Keven Vital',
     email: 'keven.vital@chabra.com.br',
     avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop',
-    role: 'ANALISTA',
+    role: 'ADMINISTRADOR', // Atualizado para ADMIN conforme solicitado
     status: 'ACTIVE',
     permissions: [],
     password: 'chabra2024'
@@ -73,31 +73,14 @@ export const mockTasks: Task[] = [
     subtasks: [],
     attachments: [],
     comments: []
-  },
-  {
-    id: 'task-backlog-1',
-    workspaceId: 'w1',
-    projectId: 'p1',
-    title: 'Triagem de Documentos Home Office',
-    description: 'Organizar documentos pendentes enviados por e-mail.',
-    status: 'BACKLOG',
-    priority: 'NORMAL',
-    assigneeId: 'u3',
-    creatorId: 'u1',
-    dueDate: '2024-12-31',
-    createdAt: '2024-05-18',
-    updatedAt: '2024-05-18',
-    tags: ['HOME OFFICE'],
-    subtasks: [],
-    attachments: []
   }
 ];
 
 export const mockNotifications: Notification[] = [
   {
     id: 'n1',
-    title: 'Acesso Remoto Liberado',
-    message: 'O portal CHABRA agora está acessível para toda a equipe em home office.',
+    title: 'Sincronização de Cargos',
+    message: 'O cargo de Keven Vital foi atualizado para Administrador em toda a rede.',
     type: 'SUCCESS',
     read: false,
     timestamp: new Date().toISOString()
