@@ -1,20 +1,21 @@
 
-export type UserRole = 
-  | 'ADMINISTRADOR' 
-  | 'GERENTE' 
-  | 'SUPERVISOR' 
-  | 'TECNICO' 
-  | 'ANALISTA';
+export type UserRole = 'ADMINISTRADOR' | 'GERENTE' | 'SUPERVISOR' | 'TECNICO' | 'ANALISTA';
 
 export interface User {
   id: string;
   name: string;
   email: string;
-  password?: string;
   avatar: string;
   role: UserRole;
   status: 'ACTIVE' | 'PENDING' | 'DISABLED';
   permissions: string[];
+}
+
+export interface Workspace {
+  id: string;
+  name: string;
+  slug: string;
+  logo?: string;
 }
 
 export type TaskStatus = string;
@@ -42,6 +43,14 @@ export interface Comment {
   createdAt: string;
 }
 
+export interface ActivityLog {
+  id: string;
+  userId: string;
+  action: string;
+  description: string;
+  timestamp: string;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -56,6 +65,7 @@ export interface Task {
   subtasks: Subtask[];
   tags: string[];
   projectId: string;
+  workspaceId: string;
   attachments?: Attachment[];
   comments?: Comment[];
 }
@@ -64,6 +74,7 @@ export interface Project {
   id: string;
   name: string;
   color: string;
+  workspaceId: string;
   description?: string;
   observations?: string;
 }
@@ -75,14 +86,6 @@ export interface Notification {
   type: 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR';
   read: boolean;
   timestamp: string;
-}
-
-export interface TaskTemplate {
-  id: string;
-  name: string;
-  defaultTitle: string;
-  defaultDescription: string;
-  defaultSubtasks: string[];
 }
 
 export const RoleHierarchy: Record<UserRole, number> = {

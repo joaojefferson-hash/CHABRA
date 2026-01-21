@@ -66,7 +66,6 @@ export const Tasks: React.FC<TasksProps> = ({
   const [newColumnName, setNewColumnName] = useState('');
   const [newColumnColor, setNewColumnColor] = useState('bg-blue-500');
   
-  // Drag and drop states
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [dragOverStatus, setDragOverStatus] = useState<string | null>(null);
   const [dragOverDate, setDragOverDate] = useState<string | null>(null);
@@ -139,13 +138,15 @@ export const Tasks: React.FC<TasksProps> = ({
       dueDate: date || new Date().toISOString().split('T')[0],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      // Ensure workspaceId is included as per Task interface
+      workspaceId: tasks.length > 0 ? tasks[0].workspaceId : 'w1',
       projectId: tasks.length > 0 ? tasks[0].projectId : 'p1',
       tags: [],
       subtasks: [],
       attachments: []
     };
     onUpdateTasks([newTask, ...allTasks]);
-    setSelectedTask(newTask);
+    setSelectedTask(newTask); // Abre o modal imediatamente para editar
   };
 
   const handleCreateColumn = (e: React.FormEvent) => {
@@ -165,8 +166,6 @@ export const Tasks: React.FC<TasksProps> = ({
     setDraggedTaskId(task.id);
     e.dataTransfer.setData("taskId", task.id);
     e.dataTransfer.effectAllowed = "move";
-    
-    // Create a ghost image if desired, but native is fine for this UI
   };
 
   const onDragOverStatus = (e: React.DragEvent, status: string) => {

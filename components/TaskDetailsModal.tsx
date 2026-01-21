@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useMemo, useEffect } from 'react';
-import { X, CheckCircle2, Circle, Plus, Trash2, Calendar, User, Tag, Flag, MessageSquare, Clock, Paperclip, Upload, FileText, ExternalLink, Check, Lock, Send, ChevronDown } from 'lucide-react';
+import { X, CheckCircle2, Circle, Plus, Trash2, Calendar, User, Tag, Flag, MessageSquare, Clock, Paperclip, Upload, FileText, ExternalLink, Check, Lock, Send, ChevronDown, Edit3 } from 'lucide-react';
 import { Task, Subtask, Priority, Attachment, Comment } from '../types.ts';
 import { PRIORITY_CONFIG, STATUS_CONFIG as DEFAULT_STATUS_CONFIG } from '../constants.tsx';
 import { mockUsers } from '../store.ts';
@@ -30,6 +30,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const commentsEndRef = useRef<HTMLDivElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   // Auto-scroll logic: triggered when comments length changes
   const scrollToBottom = () => {
@@ -40,17 +41,24 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
     scrollToBottom();
   }, [task.comments]);
 
+  // Se a tarefa acabou de ser criada (tem o título padrão), foca no título
+  useEffect(() => {
+    if (task.title === 'Nova Tarefa' || task.title === 'Nova tarefa') {
+      titleInputRef.current?.focus();
+      titleInputRef.current?.select();
+    }
+  }, []);
+
   const canEdit = useMemo(() => {
     if (!user) return false;
+    // Permitimos edição para o criador, responsável ou admin/gerente
     if (can('EDIT_OTHERS_TASKS')) return true;
-    const isOwner = task.creatorId === user.id;
-    const isAssignee = task.assigneeId === user.id;
-    return isOwner || isAssignee;
+    return task.creatorId === user.id || task.assigneeId === user.id;
   }, [task, user, can]);
 
-  const canEditPriority = useMemo(() => {
-    return user?.role === 'ADMINISTRADOR';
-  }, [user]);
+  // Permitir que todos que podem editar a tarefa também possam editar a prioridade
+  // mas mantendo uma camada de segurança se necessário. Aqui deixaremos livre para quem tem acesso de edição.
+  const canEditPriority = canEdit;
   
   const toggleSubtask = (subtaskId: string) => {
     if (!canEdit) return;
@@ -93,7 +101,6 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
 
     onUpdate(updatedTask);
 
-    // Notify assignee if someone else comments
     if (task.assigneeId !== user.id) {
       addNotification({
         title: 'Novo Comentário',
@@ -109,6 +116,11 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
     if (!canEdit) return;
     const updatedSubtasks = task.subtasks.filter(st => st.id !== subtaskId);
     onUpdate({ ...task, subtasks: updatedSubtasks, updatedAt: new Date().toISOString() });
+  };
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!canEdit) return;
+    onUpdate({ ...task, title: e.target.value, updatedAt: new Date().toISOString() });
   };
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -223,8 +235,19 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
 
         <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
           <div className="flex-[2.5] p-8 lg:p-10 border-r border-gray-100 overflow-y-auto scrollbar-thin">
-            <div className="mb-8">
-              <h2 className="text-3xl font-black text-gray-900 tracking-tight leading-tight">{task.title}</h2>
+            <div className="mb-8 relative group">
+              <div className="flex items-center gap-2 mb-2">
+                <Edit3 size={12} className="text-gray-300" />
+                <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Título da Tarefa</label>
+              </div>
+              <input 
+                ref={titleInputRef}
+                readOnly={!canEdit}
+                value={task.title}
+                onChange={handleTitleChange}
+                placeholder="Qual o nome desta tarefa?"
+                className={`w-full text-3xl font-black text-gray-900 tracking-tight leading-tight bg-transparent border-none outline-none focus:ring-0 p-0 transition-all ${canEdit ? 'focus:text-green-600' : 'cursor-default'}`}
+              />
             </div>
             
             <div className="mb-10">
