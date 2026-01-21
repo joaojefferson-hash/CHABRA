@@ -6,24 +6,46 @@ export const mockWorkspaces: Workspace[] = [
   { id: 'w2', name: 'Consultoria Saúde', slug: 'saude-cons' }
 ];
 
-export const mockUsers: User[] = [
+export const mockUsers: (User & { password?: string })[] = [
   {
     id: 'u1',
     name: 'Admin Chabra',
     email: 'admin@chabra.com.br',
-    avatar: 'https://picsum.photos/seed/admin/100',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop',
     role: 'ADMINISTRADOR',
     status: 'ACTIVE',
-    permissions: []
+    permissions: [],
+    password: 'chabra2024'
   },
   {
     id: 'u2',
-    name: 'João Silva',
-    email: 'joao@chabra.com.br',
-    avatar: 'https://picsum.photos/seed/joao/100',
-    role: 'GERENTE',
+    name: 'João Jefferson',
+    email: 'joao.jefferson@chabra.com.br',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop',
+    role: 'ADMINISTRADOR',
     status: 'ACTIVE',
-    permissions: []
+    permissions: [],
+    password: 'chabra2024'
+  },
+  {
+    id: 'u3',
+    name: 'Isabela Esteves',
+    email: 'isabela.esteves@chabra.com.br',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop',
+    role: 'ANALISTA',
+    status: 'ACTIVE',
+    permissions: [],
+    password: 'chabra2024'
+  },
+  {
+    id: 'u4',
+    name: 'Keven Vital',
+    email: 'keven.vital@chabra.com.br',
+    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop',
+    role: 'ANALISTA',
+    status: 'ACTIVE',
+    permissions: [],
+    password: 'chabra2024'
   }
 ];
 
@@ -65,7 +87,6 @@ export const mockNotifications: Notification[] = [
   }
 ];
 
-// Definition and export of mockTemplates as required by the Templates page
 export interface TaskTemplate {
   id: string;
   name: string;

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext.tsx';
 import { Logo } from '../components/Logo.tsx';
-import { Mail, Lock, Loader2, ArrowRight, AlertCircle } from 'lucide-react';
+import { Mail, Lock, Loader2, ArrowRight, AlertCircle, Globe } from 'lucide-react';
 
 export const Login: React.FC = () => {
   const { login } = useAuth();
@@ -19,10 +19,10 @@ export const Login: React.FC = () => {
     try {
       const success = await login(email, password);
       if (!success) {
-        setError('E-mail ou senha incorretos. Verifique suas credenciais.');
+        setError('E-mail ou senha incorretos. Verifique se o Caps Lock está ativado.');
       }
     } catch (err: any) {
-      setError(err.message || 'Ocorreu um erro técnico ao tentar entrar.');
+      setError(err.message || 'Erro de conexão. Verifique sua internet ou VPN.');
     } finally {
       setIsLoading(false);
     }
@@ -37,10 +37,11 @@ export const Login: React.FC = () => {
         <div className="flex flex-col items-center text-center">
           <Logo size="lg" />
           <h2 className="mt-8 text-3xl font-black text-gray-900 tracking-tight">
-            Acesso Restrito
+            Acesso Colaborador
           </h2>
-          <p className="mt-2 text-sm text-gray-500 font-medium">
-            Entre com suas credenciais corporativas CHABRA
+          <p className="mt-2 text-sm text-gray-500 font-medium flex items-center gap-2">
+            <Globe size={14} className="text-green-600" />
+            Portal Seguro para Home Office
           </p>
         </div>
 
@@ -66,7 +67,7 @@ export const Login: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="ex: nome.sobrenome@chabra.com.br"
+                  placeholder="ex: isabela.esteves@chabra.com.br"
                   className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-500/50 focus:bg-white transition-all font-medium"
                 />
               </div>
@@ -85,7 +86,7 @@ export const Login: React.FC = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Digite sua senha"
+                  placeholder="Sua senha de acesso"
                   className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-500/50 focus:bg-white transition-all font-medium"
                 />
               </div>
@@ -100,7 +101,7 @@ export const Login: React.FC = () => {
                 <Loader2 size={20} className="animate-spin" />
               ) : (
                 <>
-                  <span>Entrar no Sistema</span>
+                  <span>Entrar Agora</span>
                   <ArrowRight size={18} />
                 </>
               )}
@@ -108,16 +109,20 @@ export const Login: React.FC = () => {
             
             <div className="text-center pt-2">
               <p className="text-[9px] text-gray-400 font-black uppercase tracking-widest leading-relaxed">
-                SENHA PADRÃO: <span className="text-green-600">chabra2024</span> OU <span className="text-green-600">123456</span>
+                SENHA DE EQUIPE: <span className="text-green-600">chabra2024</span>
               </p>
             </div>
           </form>
         </div>
 
-        <div className="text-center">
+        <div className="text-center space-y-2">
           <p className="text-xs text-gray-400 font-medium">
             Chabra Gestão Interna &copy; 2026
           </p>
+          <div className="flex items-center justify-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Servidores Operacionais</span>
+          </div>
         </div>
       </div>
     </div>
